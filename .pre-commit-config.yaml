@@ -1,0 +1,62 @@
+default_install_hook_types:
+- pre-commit
+- commit-msg
+- pre-push
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  # Git
+  - id: check-added-large-files
+  - id: no-commit-to-branch
+
+  # Common errors
+  - id: end-of-file-fixer
+    exclude: README.md
+  - id: trailing-whitespace
+    args:
+    - '--markdown-linebreak-ext=md'
+    exclude: CHANGELOG.md
+  - id: check-merge-conflict
+
+  # Cross platform
+  - id: check-case-conflict
+  - id: check-illegal-windows-names
+  - id: mixed-line-ending
+    args:
+    - '--fix=lf'
+
+  # Security
+  - id: detect-aws-credentials
+    args:
+    - '--allow-missing-credentials'
+  - id: detect-private-key
+
+# Detect hardcoded secrets
+- repo: https://github.com/gitleaks/gitleaks
+  rev: v8.24.0
+  hooks:
+  - id: gitleaks
+
+# Format, validate and analyze Terraform code
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.97.4
+  hooks:
+  - id: terraform_fmt
+  - id: terraform_validate
+  - id: terraform_tflint
+  - id: terraform_trivy
+    args:
+    - '--args=--severity=CRITICAL,HIGH'
+
+# Lint commit messages with cz check
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v4.4.1
+  hooks:
+  - id: commitizen
+    stages:
+    - 'commit-msg'
+  - id: commitizen-branch
+    stages:
+    - 'pre-push'
