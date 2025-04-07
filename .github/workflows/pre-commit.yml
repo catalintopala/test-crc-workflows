@@ -1,0 +1,85 @@
+name: Pre-commit
+
+on:
+  pull_request:
+    paths:
+    - "environments/**"
+    - "modules/**"
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    permissions:
+      contents: write # allow pre-commit/action to push fixes to PR
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - run: |
+        git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+
+    - name: Get modified files
+      id: file_modifications
+      run: |
+        DIFF=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+        export DIFF
+        echo "Diff between ${{ github.base_ref }} and ${{ github.sha }}"
+        echo "files=$( echo "$DIFF" | xargs echo )" >> $GITHUB_OUTPUT
+
+    # Needed for pre-commit to fix pushes to PR
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - uses: actions/setup-python@v5.4.0
+      with:
+        python-version: '3.13'
+
+    - name: Execute pre-commit
+      uses: pre-commit/action@v2.0.3
+      env:
+        SKIP: >-
+          terraform_fmt,
+          terraform_validate,
+          terraform_tflint,
+          terraform_trivy
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        extra_args: |
+          --files ${{ steps.file_modifications.outputs.files }}
+
+    # Run skipped hooks
+
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.0
+
+    - run: |
+        terraform init
+    - run: |
+        terraform fmt
+    - run: |
+        terraform validate
+
+    - uses: terraform-linters/setup-tflint@v4
+
+    - run: |
+        tflint --init
+      env:
+        # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - run: |
+        tflint
+
+    - name: Run Trivy vulnerability scanner in IaC mode
+      uses: aquasecurity/trivy-action@0.30.0
+      with:
+        scan-type: 'config'
+        scanners: 'vuln,secret,misconfig'
+        hide-progress: true
+        exit-code: '1'
+        severity: 'CRITICAL,HIGH'
