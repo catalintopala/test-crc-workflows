@@ -1,0 +1,19 @@
+name: Deploy Cloud Resume Challenge on prod
+
+on:
+  workflow_run:
+    workflows:
+    - Documentation
+    types:
+    - completed
+
+jobs:
+  deploy-prod:
+    name: Deploy prod environment
+    # only run if documentation succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: prod
+      working_dir: ./environments/prod
+    secrets: inherit
