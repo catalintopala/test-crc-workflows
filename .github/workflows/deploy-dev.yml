@@ -1,19 +1,21 @@
 name: Deploy Cloud Resume Challenge on dev
 
 on:
-  workflow_run:
-    workflows:
-    - Documentation
-    types:
-    - completed
+  push:
+    branches:
+    - main
+    paths:
+    - "environmets/dev/**"
 
 jobs:
-  deploy-dev:
+  deploy:
     name: Deploy dev environment
-    # only run if documentation succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/deploy.yml
     with:
       environment: dev
       working_dir: ./environments/dev
     secrets: inherit
+
+  docs:
+    name: Generate Terraform documentation
+    uses: ./.github/workflows/documentation.yml

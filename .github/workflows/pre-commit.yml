@@ -26,7 +26,7 @@ jobs:
         DIFF=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
         export DIFF
         echo "Diff between ${{ github.base_ref }} and ${{ github.sha }}"
-        echo "files=$( echo "$DIFF" | xargs echo )" >> $GITHUB_OUTPUT
+        echo "files=$( echo "$DIFF" | xargs echo )" >> "$GITHUB_OUTPUT"
 
     # Needed for pre-commit to fix pushes to PR
     - uses: actions/checkout@v4
