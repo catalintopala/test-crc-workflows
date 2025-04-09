@@ -1,0 +1,47 @@
+name: Validate PR title
+
+on:
+  pull_request:
+    types:
+    - opened
+    - edited
+    - synchronize
+    - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  main:
+    permissions:
+      # allow amannn/action-semantic-pull-request to analyze PRs
+      pull-requests: read
+      # allow amannn/action-semantic-pull-request to mark status of analyzed PR
+      statuses: write
+
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+    - uses: mannn/action-semantic-pull-request@v5.5.3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # Use the default types from https://github.com/commitizen/conventional-commit-types
+
+        # Configure that a scope must always be provided.
+        requireScope: true
+        # Configure additional validation for the subject based on a regex.
+        # This ensures the subject doesn't start with an uppercase character.
+        subjectPattern: ^(?![A-Z]).+$
+        # If `subjectPattern` is configured, you can use this property to override
+        # the default error message that is shown when the pattern doesn't match.
+        # The variables `subject` and `title` can be used within the message.
+        subjectPatternError: |
+          The subject "{subject}" found in the pull request title "{title}"
+          didn't match the configured pattern. Please ensure that the subject
+          doesn't start with an uppercase character.
+        # When using "Squash and merge" on a PR with only one commit, GitHub
+        # will suggest using that commit message instead of the PR title for
+        # the merge commit, and it's easy to commit this by mistake. Enable
+        # this option to also validate the commit message for one commit PRs.
+        validateSingleCommit: false
