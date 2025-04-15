@@ -1,16 +1,11 @@
 name: Documentation
 
 on:
-  pull_request:
-    paths:
-    - "modules/**"
   workflow_call:
 
 jobs:
   docs:
     name: Generate Terraform documentation
-    # only run if pre-commit succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

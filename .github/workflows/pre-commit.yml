@@ -83,3 +83,7 @@ jobs:
         hide-progress: true
         exit-code: '1'
         severity: 'CRITICAL,HIGH'
+
+  docs:
+    name: Generate Terraform documentation
+    uses: ./.github/workflows/documentation.yml
