@@ -47,5 +47,7 @@ jobs:
 
   docs:
     needs: pre-commit
+    permissions:
+      pull-requests: write
     name: Generate Terraform documentation
     uses: ./.github/workflows/documentation.yml
