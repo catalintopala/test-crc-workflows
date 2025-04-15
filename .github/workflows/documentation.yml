@@ -31,11 +31,9 @@ jobs:
       if: steps.filter.outputs.modules == 'true'
       uses: terraform-docs/gh-actions@v1.3.0
       with:
-        recursive: true
-        recursive-include-main: false
         git-commit-message: "docs(modules): generate terraform documentation"
         git-push: true
-        working-dir: "modules"
+        working-dir: "modules/**"
 
     - name: Generate Terraform docs for dev and push changes back to PR
       if: steps.filter.outputs.dev == 'true'
