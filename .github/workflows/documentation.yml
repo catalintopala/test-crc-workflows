@@ -33,7 +33,7 @@ jobs:
       with:
         git-commit-message: "docs(modules): generate terraform documentation"
         git-push: true
-        working-dir: "modules/**"
+        find-dir: "modules/**"
 
     - name: Generate Terraform docs for dev and push changes back to PR
       if: steps.filter.outputs.dev == 'true'
