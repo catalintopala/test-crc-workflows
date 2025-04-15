@@ -85,5 +85,6 @@ jobs:
         severity: 'CRITICAL,HIGH'
 
   docs:
+    needs: pre-commit
     name: Generate Terraform documentation
     uses: ./.github/workflows/documentation.yml
