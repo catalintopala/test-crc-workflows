@@ -7,15 +7,46 @@ jobs:
   docs:
     name: Generate Terraform documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v4
       with:
         ref: ${{ github.event.pull_request.head.ref }}
 
-    - name: Generate docs and push changes back to PR
+    - name: Filter paths
+      uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          modules:
+            - 'modules/**'
+          dev:
+            - 'environments/dev/**'
+          prod:
+            - 'environments/prod/**'
+
+    - name: Generate Terraform docs for module and push changes back to PR
+      if: steps.filter.outputs.modules == 'true'
       uses: terraform-docs/gh-actions@v1.3.0
       with:
-        recursive: true
-        recursive-include-main: false # it will not generate documentation at the root
-        git-commit-message: "docs(terraform): generate documentation"
+        git-commit-message: "docs(modules): generate terraform documentation"
         git-push: true
+        find-dir: "modules"
+
+    - name: Generate Terraform docs for dev and push changes back to PR
+      if: steps.filter.outputs.dev == 'true'
+      uses: terraform-docs/gh-actions@v1.3.0
+      with:
+        git-commit-message: "docs(dev): generate terraform documentation"
+        git-push: true
+        working-dir: "environments/dev"
+
+    - name: Generate Terraform docs for prod and push changes back to PR
+      if: steps.filter.outputs.prod == 'true'
+      uses: terraform-docs/gh-actions@v1.3.0
+      with:
+        git-commit-message: "docs(prod): generate terraform documentation"
+        git-push: true
+        working-dir: "environments/prod"

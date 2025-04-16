@@ -5,7 +5,7 @@ on:
     branches:
     - main
     paths:
-    - "environmets/prod/**"
+    - "environments/prod/**"
 
 jobs:
   deploy:
@@ -15,7 +15,3 @@ jobs:
       environment: prod
       working_dir: ./environments/prod
     secrets: inherit
-
-  docs:
-    name: Generate Terraform documentation
-    uses: ./.github/workflows/documentation.yml
